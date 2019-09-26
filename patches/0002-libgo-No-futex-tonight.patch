@@ -1,0 +1,25 @@
+From 5ea9d76060b0347002468159fc50b8f81bc726b1 Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Fri, 16 Aug 2019 23:14:34 +0200
+Subject: [PATCH 2/2] libgo: No futex tonight
+
+Signed-off-by: Costin Lupu <costin.lupu@cs.pub.ro>
+---
+ libgo/runtime/thread-linux.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/libgo/runtime/thread-linux.c b/libgo/runtime/thread-linux.c
+index 81ad0f9c9..fd5a31182 100644
+--- a/libgo/runtime/thread-linux.c
++++ b/libgo/runtime/thread-linux.c
+@@ -9,7 +9,6 @@
+ 
+ #include <unistd.h>
+ #include <syscall.h>
+-#include <linux/futex.h>
+ 
+ void
+ runtime_osinit(void)
+-- 
+2.20.1
+

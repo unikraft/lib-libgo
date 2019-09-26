@@ -1,0 +1,25 @@
+From 596b3b33e72c5c64cb7ead4aee2983869008ad44 Mon Sep 17 00:00:00 2001
+Date: Fri, 16 Aug 2019 23:13:03 +0200
+Subject: [PATCH 1/2] libgo: Use gcc own unwind header instead of system one
+
+Signed-off-by: Costin Lupu <costin.lupu@cs.pub.ro>
+---
+ libgo/runtime/go-unwind.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libgo/runtime/go-unwind.c b/libgo/runtime/go-unwind.c
+index 4c9fb49c9..907ba0336 100644
+--- a/libgo/runtime/go-unwind.c
++++ b/libgo/runtime/go-unwind.c
+@@ -9,7 +9,7 @@
+ #include <stdlib.h>
+ #include <unistd.h>
+ 
+-#include "unwind.h"
++#include "unwind-generic.h"
+ #define NO_SIZE_OF_ENCODED_VALUE
+ #include "unwind-pe.h"
+ 
+-- 
+2.20.1
+
