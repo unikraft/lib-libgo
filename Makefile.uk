@@ -1,0 +1,167 @@
+#  SPDX-License-Identifier: BSD-3-Clause
+#
+#  libgo Makefile.uk
+#
+#  Authors: Charalampos Mainas <charalampos.mainas@neclab.eu>
+#           Costin Lupu <costin.lupu@cs.pub.ro>
+#
+#  Copyright (c) 2019, NEC Europe Ltd., NEC Corporation
+#                2019, University Politehnica of Bucharest
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+#  THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
+#
+
+################################################################################
+# Library registration
+################################################################################
+$(eval $(call addlib_s,libgo,$(CONFIG_LIBGO)))
+
+################################################################################
+# Original sources
+################################################################################
+LIBGCC_VERSION=7.3.0
+LIBGCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-$(LIBGCC_VERSION)/gcc-$(LIBGCC_VERSION).tar.gz
+LIBGO_PATCHDIR=$(LIBGO_BASE)/patches
+LIBGCC_SUBDIR=gcc-$(LIBGCC_VERSION)
+## Patch gcc sources with libgo patches
+$(eval $(call patch,libgcc,$(LIBGO_PATCHDIR),$(LIBGCC_SUBDIR)))
+
+################################################################################
+# Helpers
+################################################################################
+LIBGCC_EXTRACTED = $(LIBGCC_ORIGIN)/gcc-$(LIBGCC_VERSION)
+LIBGO_EXTRACTED = $(LIBGCC_EXTRACTED)/libgo
+
+################################################################################
+# Library includes
+################################################################################
+LIBGO_COMMON_INCLUDES-y = -I$(LIBGO_BASE)/include -I$(LIBGO_BASE)/generated/include \
+	-I$(LIBGO_EXTRACTED) -I$(LIBGO_EXTRACTED)/runtime \
+	-I$(LIBGCC_EXTRACTED)/libffi/include -I$(LIBGCC_BASE)/libffi/include \
+	-I$(LIBGCC_EXTRACTED)/libgcc \
+	-I$(LIBBACKTRACE_EXTRACTED) \
+	-I$(LIBGCC_EXTRACTED)/gcc/include
+LIBGO_COMMON_INCLUDES-$(CONFIG_ARCH_X86_64) += -I$(LIBFFI_EXTRACTED)/src/x86
+LIBGO_COMMON_INCLUDES-$(CONFIG_ARCH_X86_64) += -I$(LIBGCC_EXTRACTED)/gcc/config/i386
+LIBGO_ASINCLUDES-y = $(LIBGO_COMMON_INCLUDES-y)
+LIBGO_CINCLUDES-y  = $(LIBGO_COMMON_INCLUDES-y)
+
+
+################################################################################
+# Global flags
+################################################################################
+LIBGO_CFLAGS-y += -DHAVE_CONFIG_H -D_INCLUDE_MALLOC_H_ \
+	-fexceptions -fnon-call-exceptions -fplan9-extensions -fno-split-stack \
+	-Wall -Wextra -Wwrite-strings -Wcast-qual -Wno-unused-function \
+	-minline-all-stringops -Wno-implicit-function-declaration \
+	-D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+LIBGO_CFLAGS-y += -Wno-cast-qual -Wno-unused-value
+
+################################################################################
+# libgo code
+################################################################################
+
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/bytes/indexbyte.c|bytes
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/log/syslog/syslog_c.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/reflect/makefunc_ffi_c.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/runtime/internal/atomic/atomic.c|runtime.internal
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/strings/indexbyte.c|strings
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/sync/atomic/atomic.c|sync
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/syscall/clone_linux.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/syscall/errno.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/syscall/signame.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/syscall/wait.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/aeshash.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/env_posix.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/getncpu-linux.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-assert.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-breakpoint.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-caller.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-callers.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-cdiv.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-cgo.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-construct-map.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-ffi.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-fieldtrack.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-matherr.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-memclr.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-memcmp.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-memequal.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-memmove.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-nanotime.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-new.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-nosys.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-now.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-reflect-call.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-runtime-error.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-setenv.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-signal.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-strslice.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-typedesc-equal.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-unsafe-newarray.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-unsafe-new.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-unsafe-pointer.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-unsetenv.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-unwind.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-varargs.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/heapdump.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mcache.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mcentral.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mem.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mfixalloc.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mgc0.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mheap.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/msize.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/panic.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/parfor.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/print.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/proc.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/runtime_c.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/thread.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/thread-linux.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/yield.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-main.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/sysinfo.c
+LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/malloc.c # generated
+
+# Generate go2c tool
+$(LIBGO_BUILD)/goc2c: $(LIBGCC_BUILD)/.patched
+	$(call verbose_cmd,GEN,libgo: $(notdir $@), \
+		cd $(LIBGO_EXTRACTED) && gcc -o $@ $(LIBGO_EXTRACTED)/runtime/goc2c.c)
+
+# Generate malloc.c
+$(LIBGO_EXTRACTED)/malloc.c: $(LIBGO_EXTRACTED)/runtime/malloc.goc $(LIBGO_BUILD)/goc2c
+	$(call verbose_cmd,GEN,libgo: $(notdir $@), \
+		cd $(LIBGO_EXTRACTED) && $(LIBGO_BUILD)/goc2c $< > $@)
+
+UK_PREPARE += $(LIBGO_BUILD)/goc2c $(LIBGO_EXTRACTED)/malloc.c
+
+# Go packages
+LIBGO_GOFLAGS-y += -minline-all-stringops -fno-split-stack
+LIBGO_GOFLAGS-y += -I$(LIBGO_BUILD)
+LIBGO_GOFLAGS = $(LIBGO_GOFLAGS-y)
