@@ -1,0 +1,20 @@
+config LIBGO
+	bool "libgo - Go library"
+	default n
+	select LIBUKDEBUG
+	select LIBUKALLOC
+	select LIBNEWLIBC
+	select LIBUKMMAP
+	select UKSYSINFO
+	select LIBCOMPILER_RT
+	select LIBUNWIND
+	select LIBCXX
+	select LIBCXXABI
+	select LIBPTHREAD_EMBEDDED
+	select LIBGCC
+	select LIBFFI
+	select LIBBACKTRACE
+	select LIBLWIP
+	select LIBUCONTEXT
+	select UKUNISTD
+	select LIBSYSCALL_SHIM
