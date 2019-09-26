@@ -86,6 +86,8 @@ LIBGO_CFLAGS-y += -Wno-cast-qual -Wno-unused-value
 # libgo code
 ################################################################################
 
+LIBGO_SRCS-y += $(LIBGO_BASE)/glue.c
+
 LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/bytes/indexbyte.c|bytes
 LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/log/syslog/syslog_c.c
 LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/reflect/makefunc_ffi_c.c
