@@ -426,49 +426,6 @@ func accept4(fd int, sa *RawSockaddrAny, len *Socklen_t, flags int) (nfd int, er
 	return
 }
 
-// Automatically generated wrapper for Acct/acct
-//extern acct
-func c_acct(path *byte) _C_int
-func Acct(path string) (err error) {
-	var _p1 *byte
-	_p1, err = BytePtrFromString(path)
-	if err != nil {
-		return
-	}
-	Entersyscall()
-	_r := c_acct(_p1)
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Adjtimex/adjtimex
-//extern adjtimex
-func c_adjtimex(buf *Timex) _C_int
-func Adjtimex(buf *Timex) (state int, err error) {
-	Entersyscall()
-	_r := c_adjtimex(buf)
-	state = (int)(_r)
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
 
 // Automatically generated wrapper for Dup3/dup3
 //extern dup3
@@ -731,31 +688,6 @@ func InotifyRmWatch(fd int, watchdesc uint32) (success int, err error) {
 	return
 }
 
-// Automatically generated wrapper for Klogctl/klogctl
-//extern klogctl
-func c_klogctl(typ _C_int, bufp *byte, len _C_int) _C_int
-func Klogctl(typ int, buf []byte) (n int, err error) {
-	var _p2 *byte
-	if len(buf) > 0 {
-		_p2 = (*byte)(unsafe.Pointer(&buf[0]))
-	} else {
-		_p2 = (*byte)(unsafe.Pointer(&_zero))
-	}
-	Entersyscall()
-	_r := c_klogctl(_C_int(typ), _p2, _C_int(len(buf)))
-	n = (int)(_r)
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
 
 // Automatically generated wrapper for Listxattr/listxattr
 //extern listxattr
@@ -853,34 +785,6 @@ func pipe2(p *[2]_C_int, flags int) (err error) {
 	return
 }
 
-// Automatically generated wrapper for PivotRoot/pivot_root
-//extern pivot_root
-func c_pivot_root(newroot *byte, putold *byte) _C_int
-func PivotRoot(newroot string, putold string) (err error) {
-	var _p1 *byte
-	_p1, err = BytePtrFromString(newroot)
-	if err != nil {
-		return
-	}
-	var _p2 *byte
-	_p2, err = BytePtrFromString(putold)
-	if err != nil {
-		return
-	}
-	Entersyscall()
-	_r := c_pivot_root(_p1, _p2)
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
 
 // Automatically generated wrapper for Removexattr/removexattr
 //extern removexattr
@@ -954,61 +858,6 @@ func sendfile(outfd int, infd int, offset *Offset_t, count int) (written int, er
 		setErrno = true
 	}
 	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Setfsgid/setfsgid
-//extern setfsgid
-func c_setfsgid(gid Gid_t) _C_int
-func Setfsgid(gid int) (err error) {
-	Entersyscall()
-	_r := c_setfsgid(Gid_t(gid))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Setfsuid/setfsuid
-//extern setfsuid
-func c_setfsuid(uid Uid_t) _C_int
-func Setfsuid(uid int) (err error) {
-	Entersyscall()
-	_r := c_setfsuid(Uid_t(uid))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Setresgid/setresgid
-//extern setresgid
-func c_setresgid(rgid Gid_t, egid Gid_t, sgid Gid_t) _C_int
-func Setresgid(rgid int, egid int, sgid int) (err error) {
-	_r := c_setresgid(Gid_t(rgid), Gid_t(egid), Gid_t(sgid))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
 	if setErrno {
 		err = errno
 	}
@@ -1130,23 +979,6 @@ func SyncFileRange(fd int, off int64, n int64, flags int) (err error) {
 	return
 }
 
-// Automatically generated wrapper for Sysinfo/sysinfo
-//extern sysinfo
-func c_sysinfo(info *Sysinfo_t) _C_int
-func Sysinfo(info *Sysinfo_t) (err error) {
-	_r := c_sysinfo(info)
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
 // Automatically generated wrapper for Tee/tee
 //extern tee
 func c_tee(rfd _C_int, wfd _C_int, len Size_t, flags _C_uint) Ssize_t
@@ -1221,63 +1053,6 @@ func c_unshare(flags _C_int) _C_int
 func Unshare(flags int) (err error) {
 	Entersyscall()
 	_r := c_unshare(_C_int(flags))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Ioperm/ioperm
-//extern ioperm
-func c_ioperm(from _C_long, num _C_long, on _C_int) _C_int
-func Ioperm(from int, num int, on int) (err error) {
-	Entersyscall()
-	_r := c_ioperm(_C_long(from), _C_long(num), _C_int(on))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Iopl/iopl
-//extern iopl
-func c_iopl(level _C_int) _C_int
-func Iopl(level int) (err error) {
-	Entersyscall()
-	_r := c_iopl(_C_int(level))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Ustat/ustat
-//extern ustat
-func c_ustat(dev _dev_t, ubuf *Ustat_t) _C_int
-func Ustat(dev int, ubuf *Ustat_t) (err error) {
-	Entersyscall()
-	_r := c_ustat(_dev_t(dev), ubuf)
 	var errno Errno
 	setErrno := false
 	if _r < 0 {
@@ -1402,30 +1177,6 @@ func setgroups(n int, list *Gid_t) (err error) {
 		errno = GetErrno()
 		setErrno = true
 	}
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Mkfifo/mkfifo
-//extern mkfifo
-func c_mkfifo(path *byte, mode Mode_t) _C_int
-func Mkfifo(path string, mode uint32) (err error) {
-	var _p1 *byte
-	_p1, err = BytePtrFromString(path)
-	if err != nil {
-		return
-	}
-	Entersyscall()
-	_r := c_mkfifo(_p1, Mode_t(mode))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
 	if setErrno {
 		err = errno
 	}
@@ -1852,26 +1603,6 @@ func Getppid() (ppid int) {
 	return
 }
 
-// Automatically generated wrapper for Getpriority/getpriority
-//extern getpriority
-func c_getpriority(which _C_int, who _C_int) _C_int
-func Getpriority(which int, who int) (prio int, err error) {
-	Entersyscall()
-	_r := c_getpriority(_C_int(which), _C_int(who))
-	prio = (int)(_r)
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
 // Automatically generated wrapper for Getrusage/getrusage
 //extern getrusage
 func c_getrusage(who _C_int, rusage *Rusage) _C_int
@@ -2236,31 +1967,6 @@ func Rmdir(path string) (err error) {
 	return
 }
 
-// Automatically generated wrapper for Setdomainname/setdomainname
-//extern setdomainname
-func c_setdomainname(name *byte, len Size_t) _C_int
-func Setdomainname(p []byte) (err error) {
-	var _p1 *byte
-	if len(p) > 0 {
-		_p1 = (*byte)(unsafe.Pointer(&p[0]))
-	} else {
-		_p1 = (*byte)(unsafe.Pointer(&_zero))
-	}
-	Entersyscall()
-	_r := c_setdomainname(_p1, Size_t(len(p)))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
 // Automatically generated wrapper for Sethostname/sethostname
 //extern sethostname
 func c_sethostname(name *byte, len Size_t) _C_int
@@ -2329,25 +2035,6 @@ func Setpgid(pid int, pgid int) (err error) {
 		errno = GetErrno()
 		setErrno = true
 	}
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Setpriority/setpriority
-//extern setpriority
-func c_setpriority(which _C_int, who _C_int, prio _C_int) _C_int
-func Setpriority(which int, who int, prio int) (err error) {
-	Entersyscall()
-	_r := c_setpriority(_C_int(which), _C_int(who), _C_int(prio))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
 	if setErrno {
 		err = errno
 	}
@@ -2663,94 +2350,6 @@ func Mprotect(b []byte, prot int) (err error) {
 	return
 }
 
-// Automatically generated wrapper for Mlock/mlock
-//extern mlock
-func c_mlock(addr *byte, len Size_t) _C_int
-func Mlock(b []byte) (err error) {
-	var _p1 *byte
-	if len(b) > 0 {
-		_p1 = (*byte)(unsafe.Pointer(&b[0]))
-	} else {
-		_p1 = (*byte)(unsafe.Pointer(&_zero))
-	}
-	Entersyscall()
-	_r := c_mlock(_p1, Size_t(len(b)))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Munlock/munlock
-//extern munlock
-func c_munlock(addr *byte, len Size_t) _C_int
-func Munlock(b []byte) (err error) {
-	var _p1 *byte
-	if len(b) > 0 {
-		_p1 = (*byte)(unsafe.Pointer(&b[0]))
-	} else {
-		_p1 = (*byte)(unsafe.Pointer(&_zero))
-	}
-	Entersyscall()
-	_r := c_munlock(_p1, Size_t(len(b)))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Mlockall/mlockall
-//extern mlockall
-func c_mlockall(flags _C_int) _C_int
-func Mlockall(flags int) (err error) {
-	Entersyscall()
-	_r := c_mlockall(_C_int(flags))
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
-// Automatically generated wrapper for Munlockall/munlockall
-//extern munlockall
-func c_munlockall() _C_int
-func Munlockall() (err error) {
-	Entersyscall()
-	_r := c_munlockall()
-	var errno Errno
-	setErrno := false
-	if _r < 0 {
-		errno = GetErrno()
-		setErrno = true
-	}
-	Exitsyscall()
-	if setErrno {
-		err = errno
-	}
-	return
-}
-
 // Automatically generated wrapper for Tcgetattr/tcgetattr
 //extern tcgetattr
 func c_tcgetattr(fd _C_int, p *Termios) _C_int
@@ -2807,12 +2406,12 @@ func sysconf(name int) (ret int64, err error) {
 	return
 }
 
-// Automatically generated wrapper for Fstat/fstat64
-//extern fstat64
-func c_fstat64(fd _C_int, stat *Stat_t) _C_int
+// Automatically generated wrapper for Fstat/fstat
+//extern fstat
+func c_fstat(fd _C_int, stat *Stat_t) _C_int
 func Fstat(fd int, stat *Stat_t) (err error) {
 	Entersyscall()
-	_r := c_fstat64(_C_int(fd), stat)
+	_r := c_fstat(_C_int(fd), stat)
 	var errno Errno
 	setErrno := false
 	if _r < 0 {
@@ -2826,12 +2425,12 @@ func Fstat(fd int, stat *Stat_t) (err error) {
 	return
 }
 
-// Automatically generated wrapper for Ftruncate/ftruncate64
-//extern ftruncate64
-func c_ftruncate64(fd _C_int, length Offset_t) _C_int
+// Automatically generated wrapper for Ftruncate/ftruncate
+//extern ftruncate
+func c_ftruncate(fd _C_int, length Offset_t) _C_int
 func Ftruncate(fd int, length int64) (err error) {
 	Entersyscall()
-	_r := c_ftruncate64(_C_int(fd), Offset_t(length))
+	_r := c_ftruncate(_C_int(fd), Offset_t(length))
 	var errno Errno
 	setErrno := false
 	if _r < 0 {
@@ -2845,11 +2444,11 @@ func Ftruncate(fd int, length int64) (err error) {
 	return
 }
 
-// Automatically generated wrapper for Getrlimit/getrlimit64
-//extern getrlimit64
-func c_getrlimit64(resource _C_int, rlim *Rlimit) _C_int
+// Automatically generated wrapper for Getrlimit/getrlimit
+//extern getrlimit
+func c_getrlimit(resource _C_int, rlim *Rlimit) _C_int
 func Getrlimit(resource int, rlim *Rlimit) (err error) {
-	_r := c_getrlimit64(_C_int(resource), rlim)
+	_r := c_getrlimit(_C_int(resource), rlim)
 	var errno Errno
 	setErrno := false
 	if _r < 0 {
@@ -2862,9 +2461,9 @@ func Getrlimit(resource int, rlim *Rlimit) (err error) {
 	return
 }
 
-// Automatically generated wrapper for Lstat/lstat64
-//extern lstat64
-func c_lstat64(path *byte, stat *Stat_t) _C_int
+// Automatically generated wrapper for Lstat/lstat
+//extern lstat
+func c_lstat(path *byte, stat *Stat_t) _C_int
 func Lstat(path string, stat *Stat_t) (err error) {
 	var _p1 *byte
 	_p1, err = BytePtrFromString(path)
@@ -2872,7 +2471,7 @@ func Lstat(path string, stat *Stat_t) (err error) {
 		return
 	}
 	Entersyscall()
-	_r := c_lstat64(_p1, stat)
+	_r := c_lstat(_p1, stat)
 	var errno Errno
 	setErrno := false
 	if _r < 0 {
@@ -2886,12 +2485,12 @@ func Lstat(path string, stat *Stat_t) (err error) {
 	return
 }
 
-// Automatically generated wrapper for mmap/mmap64
-//extern mmap64
-func c_mmap64(addr *byte, length Size_t, prot _C_int, flags _C_int, fd _C_int, offset Offset_t) *byte
+// Automatically generated wrapper for mmap/mmap
+//extern mmap
+func c_mmap(addr *byte, length Size_t, prot _C_int, flags _C_int, fd _C_int, offset Offset_t) *byte
 func mmap(addr uintptr, length uintptr, prot int, flags int, fd int, offset int64) (xaddr uintptr, err error) {
 	Entersyscall()
-	_r := c_mmap64((*byte)(unsafe.Pointer(addr)), Size_t(length), _C_int(prot), _C_int(flags), _C_int(fd), Offset_t(offset))
+	_r := c_mmap((*byte)(unsafe.Pointer(addr)), Size_t(length), _C_int(prot), _C_int(flags), _C_int(fd), Offset_t(offset))
 	xaddr = (uintptr)(unsafe.Pointer(_r))
 	var errno Errno
 	setErrno := false
@@ -2906,9 +2505,9 @@ func mmap(addr uintptr, length uintptr, prot int, flags int, fd int, offset int6
 	return
 }
 
-// Automatically generated wrapper for Open/__go_open64
-//extern __go_open64
-func c___go_open64(path *byte, mode _C_int, perm Mode_t) _C_int
+// Automatically generated wrapper for Open/__go_open
+//extern __go_open
+func c___go_open(path *byte, mode _C_int, perm Mode_t) _C_int
 func Open(path string, mode int, perm uint32) (fd int, err error) {
 	var _p1 *byte
 	_p1, err = BytePtrFromString(path)
@@ -2916,7 +2515,7 @@ func Open(path string, mode int, perm uint32) (fd int, err error) {
 		return
 	}
 	Entersyscall()
-	_r := c___go_open64(_p1, _C_int(mode), Mode_t(perm))
+	_r := c___go_open(_p1, _C_int(mode), Mode_t(perm))
 	fd = (int)(_r)
 	var errno Errno
 	setErrno := false
@@ -2931,9 +2530,9 @@ func Open(path string, mode int, perm uint32) (fd int, err error) {
 	return
 }
 
-// Automatically generated wrapper for Pread/pread64
-//extern pread64
-func c_pread64(fd _C_int, buf *byte, count Size_t, offset Offset_t) Ssize_t
+// Automatically generated wrapper for Pread/pread
+//extern pread
+func c_pread(fd _C_int, buf *byte, count Size_t, offset Offset_t) Ssize_t
 func Pread(fd int, p []byte, offset int64) (n int, err error) {
 	var _p2 *byte
 	if len(p) > 0 {
@@ -2942,7 +2541,7 @@ func Pread(fd int, p []byte, offset int64) (n int, err error) {
 		_p2 = (*byte)(unsafe.Pointer(&_zero))
 	}
 	Entersyscall()
-	_r := c_pread64(_C_int(fd), _p2, Size_t(len(p)), Offset_t(offset))
+	_r := c_pread(_C_int(fd), _p2, Size_t(len(p)), Offset_t(offset))
 	n = (int)(_r)
 	var errno Errno
 	setErrno := false
@@ -2957,9 +2556,9 @@ func Pread(fd int, p []byte, offset int64) (n int, err error) {
 	return
 }
 
-// Automatically generated wrapper for Pwrite/pwrite64
-//extern pwrite64
-func c_pwrite64(fd _C_int, buf *byte, count Size_t, offset Offset_t) Ssize_t
+// Automatically generated wrapper for Pwrite/pwrite
+//extern pwrite
+func c_pwrite(fd _C_int, buf *byte, count Size_t, offset Offset_t) Ssize_t
 func Pwrite(fd int, p []byte, offset int64) (n int, err error) {
 	var _p2 *byte
 	if len(p) > 0 {
@@ -2968,7 +2567,7 @@ func Pwrite(fd int, p []byte, offset int64) (n int, err error) {
 		_p2 = (*byte)(unsafe.Pointer(&_zero))
 	}
 	Entersyscall()
-	_r := c_pwrite64(_C_int(fd), _p2, Size_t(len(p)), Offset_t(offset))
+	_r := c_pwrite(_C_int(fd), _p2, Size_t(len(p)), Offset_t(offset))
 	n = (int)(_r)
 	var errno Errno
 	setErrno := false
@@ -2983,12 +2582,12 @@ func Pwrite(fd int, p []byte, offset int64) (n int, err error) {
 	return
 }
 
-// Automatically generated wrapper for Seek/lseek64
-//extern lseek64
-func c_lseek64(fd _C_int, offset Offset_t, whence _C_int) Offset_t
+// Automatically generated wrapper for Seek/lseek
+//extern lseek
+func c_lseek(fd _C_int, offset Offset_t, whence _C_int) Offset_t
 func Seek(fd int, offset int64, whence int) (off int64, err error) {
 	Entersyscall()
-	_r := c_lseek64(_C_int(fd), Offset_t(offset), _C_int(whence))
+	_r := c_lseek(_C_int(fd), Offset_t(offset), _C_int(whence))
 	off = (int64)(_r)
 	var errno Errno
 	setErrno := false
@@ -3003,11 +2602,11 @@ func Seek(fd int, offset int64, whence int) (off int64, err error) {
 	return
 }
 
-// Automatically generated wrapper for Setrlimit/setrlimit64
-//extern setrlimit64
-func c_setrlimit64(resource int, rlim *Rlimit) _C_int
+// Automatically generated wrapper for Setrlimit/setrlimit
+//extern setrlimit
+func c_setrlimit(resource int, rlim *Rlimit) _C_int
 func Setrlimit(resource int, rlim *Rlimit) (err error) {
-	_r := c_setrlimit64(int(resource), rlim)
+	_r := c_setrlimit(int(resource), rlim)
 	var errno Errno
 	setErrno := false
 	if _r < 0 {
@@ -3020,9 +2619,9 @@ func Setrlimit(resource int, rlim *Rlimit) (err error) {
 	return
 }
 
-// Automatically generated wrapper for Stat/stat64
-//extern stat64
-func c_stat64(path *byte, stat *Stat_t) _C_int
+// Automatically generated wrapper for Stat/stat
+//extern stat
+func c_stat(path *byte, stat *Stat_t) _C_int
 func Stat(path string, stat *Stat_t) (err error) {
 	var _p1 *byte
 	_p1, err = BytePtrFromString(path)
@@ -3030,7 +2629,7 @@ func Stat(path string, stat *Stat_t) (err error) {
 		return
 	}
 	Entersyscall()
-	_r := c_stat64(_p1, stat)
+	_r := c_stat(_p1, stat)
 	var errno Errno
 	setErrno := false
 	if _r < 0 {
@@ -3044,9 +2643,9 @@ func Stat(path string, stat *Stat_t) (err error) {
 	return
 }
 
-// Automatically generated wrapper for Truncate/truncate64
-//extern truncate64
-func c_truncate64(path *byte, length Offset_t) _C_int
+// Automatically generated wrapper for Truncate/truncate
+//extern truncate
+func c_truncate(path *byte, length Offset_t) _C_int
 func Truncate(path string, length int64) (err error) {
 	var _p1 *byte
 	_p1, err = BytePtrFromString(path)
@@ -3054,7 +2653,7 @@ func Truncate(path string, length int64) (err error) {
 		return
 	}
 	Entersyscall()
-	_r := c_truncate64(_p1, Offset_t(length))
+	_r := c_truncate(_p1, Offset_t(length))
 	var errno Errno
 	setErrno := false
 	if _r < 0 {
