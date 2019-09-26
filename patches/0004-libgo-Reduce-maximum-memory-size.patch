@@ -1,0 +1,27 @@
+From caaef739ecf4e87b9994747cbe6c7e627c8678d9 Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Wed, 21 Aug 2019 17:03:49 +0300
+Subject: [PATCH 2/3] libgo: Reduce maximum memory size
+
+Signed-off-by: Charalampos Mainas <charalampos.mainas@neclab.eu>
+---
+ libgo/runtime/malloc.goc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libgo/runtime/malloc.goc b/libgo/runtime/malloc.goc
+index 232210fc4..211b84748 100644
+--- a/libgo/runtime/malloc.goc
++++ b/libgo/runtime/malloc.goc
+@@ -448,7 +448,8 @@ runtime_mallocinit(void)
+ 		// but it hardly matters: e0 00 is not valid UTF-8 either.
+ 		//
+ 		// If this fails we fall back to the 32 bit memory mechanism
+-		arena_size = MaxMem;
++		//arena_size = MaxMem;
++		arena_size = 104857600;
+ 		bitmap_size = arena_size / (sizeof(void*)*8/4);
+ 		spans_size = arena_size / PageSize * sizeof(runtime_mheap.spans[0]);
+ 		spans_size = ROUND(spans_size, PageSize);
+-- 
+2.20.1
+
