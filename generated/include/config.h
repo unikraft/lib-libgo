@@ -62,7 +62,7 @@
 #define HAVE_FALLOCATE 1
 
 /* Define to 1 if you have the `fchmodat' function. */
-#define HAVE_FCHMODAT 1
+//#define HAVE_FCHMODAT 1
 
 /* Define to 1 if you have the `fchownat' function. */
 //#define HAVE_FCHOWNAT 1
@@ -77,16 +77,16 @@
 //#define HAVE_GETXATTR 1
 
 /* Define to 1 if you have the `inotify_add_watch' function. */
-#define HAVE_INOTIFY_ADD_WATCH 1
+//#define HAVE_INOTIFY_ADD_WATCH 1
 
 /* Define to 1 if you have the `inotify_init' function. */
-#define HAVE_INOTIFY_INIT 1
+//#define HAVE_INOTIFY_INIT 1
 
 /* Define to 1 if you have the `inotify_init1' function. */
-#define HAVE_INOTIFY_INIT1 1
+//#define HAVE_INOTIFY_INIT1 1
 
 /* Define to 1 if you have the `inotify_rm_watch' function. */
-#define HAVE_INOTIFY_RM_WATCH 1
+//#define HAVE_INOTIFY_RM_WATCH 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
@@ -185,7 +185,7 @@
 #define HAVE_OFF64_T 1
 
 /* Define to 1 if you have the `open64' function. */
-#define HAVE_OPEN64 1
+//#define HAVE_OPEN64 1
 
 /* Define to 1 if you have the `openat' function. */
 #define HAVE_OPENAT 1
@@ -215,7 +215,7 @@
 #define HAVE_SETENV 1
 
 /* Define to 1 if you have the `setxattr' function. */
-#define HAVE_SETXATTR 1
+//#define HAVE_SETXATTR 1
 
 /* Define to 1 if you have the `sinl' function. */
 #define HAVE_SINL 1
@@ -261,7 +261,7 @@
 #define HAVE_SYNC_FETCH_AND_ADD_4 1
 
 /* Define to 1 if you have the `sync_file_range' function. */
-#define HAVE_SYNC_FILE_RANGE 1
+//#define HAVE_SYNC_FILE_RANGE 1
 
 /* Define to 1 if you have the <syscall.h> header file. */
 #define HAVE_SYSCALL_H 1
