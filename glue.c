@@ -40,6 +40,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <signal.h>
 #include <sys/mman.h>
 #include <sys/statfs.h>
 #include <sys/stat.h>
