@@ -16,5 +16,5 @@ config LIBGO
 	select LIBBACKTRACE
 	select LIBLWIP
 	select LIBUCONTEXT
-	select UKUNISTD
+	select LIBPOSIX_USER
 	select LIBSYSCALL_SHIM
