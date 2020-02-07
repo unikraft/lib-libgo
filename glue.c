@@ -187,7 +187,10 @@ void makecontext1 (ucontext_t *__ucp, void (*__func) (void), int __argc, ...)
 void *alloc_stack()
 {
 	struct uk_sched *sched = uk_sched_get_default();
-	void *stack = uk_palloc(sched->allocator, __STACK_SIZE_PAGE_ORDER);
+	void *stack;
+
+	uk_posix_memalign(sched->allocator,
+			  &stack, __STACK_SIZE, __STACK_SIZE);
 	if (stack == NULL)
 		printf("error allocating stack\n");
 	return stack;
