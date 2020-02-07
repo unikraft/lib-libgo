@@ -72,16 +72,6 @@ int mincore(void *addr __unused, size_t length __unused, unsigned char *vec __un
 	return 0;
 }
 
-int prctl(int option __unused, unsigned long arg2 __unused, unsigned long arg3 __unused, unsigned long arg4 __unused, unsigned long arg5 __unused)
-{
-	return 0;
-}
-
-int pthread_sigmask(int how __unused, const sigset_t *set __unused, sigset_t *oldset __unused)
-{
-	return 0;
-}
-
 long ptrace(void)
 {
 	return 0;
@@ -97,11 +87,6 @@ int sched_getaffinity(void)
 	return 0;
 }
 
-int setitimer(int which __unused, const struct itimerval *new_value __unused, struct itimerval *old_value __unused)
-{
-	return 0;
-}
-
 int settimeofday(const struct timeval *tv __unused, const struct timezone *tz __unused)
 {
 	return 0;
@@ -109,11 +94,6 @@ int settimeofday(const struct timeval *tv __unused, const struct timezone *tz __
 
 #undef sigaddset
 int sigaddset(sigset_t *set __unused, int signum __unused)
-{
-	return 0;
-}
-
-int sigaltstack(const stack_t *ss __unused, stack_t *old_ss __unused)
 {
 	return 0;
 }
@@ -136,11 +116,6 @@ int sigfillset(sigset_t *set __unused)
 	return 0;
 }
 
-long syscall(long number __unused, ...)
-{
-	return 0;
-}
-
 ssize_t sendfile64(int out_fd __unused, int in_fd __unused, off_t *offset  __unused, size_t  count __unused)
 {
 	return 1;
@@ -151,19 +126,10 @@ int getgrouplist(const char *user __unused, gid_t group __unused, gid_t *groups 
 	return 0;
 }
 
-int getgrnam_r(const char *name __unused, struct group *grp __unused,
-		char *buf __unused, size_t buflen __unused, struct group **result __unused)
-{
-	return 0;
-}
 int getgrgid_r(gid_t gid __unused, struct group *grp __unused,
 		char *buf __unused, size_t buflen __unused, struct group **result __unused)
 {
 	return 0;
-}
-
-void uk_syscall_fn___NR_clone(void)
-{
 }
 
 /*
@@ -200,4 +166,3 @@ size_t get_stack_size(void)
 {
 	return __STACK_SIZE;
 }
-
