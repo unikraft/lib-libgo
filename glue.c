@@ -52,6 +52,12 @@ int epoll_create(int size __unused)
 	return 0;
 }
 
+int epoll_create1(int flags)
+{
+	errno = ENFILE;
+	return -1;
+}
+
 int epoll_ctl(int epfd __unused, int op __unused, int fd __unused, struct epoll_event *event __unused)
 {
 	return 0;
@@ -121,6 +127,23 @@ ssize_t sendfile64(int out_fd __unused, int in_fd __unused, off_t *offset  __unu
 	return 1;
 }
 
+typedef void loff_t;
+ssize_t splice(int fd_in __unused, loff_t *off_in __unused, int fd_out __unused,
+	       loff_t *off_out __unused, size_t len __unused,
+	       unsigned int flags __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int sync_file_range(int fd __unused, off64_t offset __unused,
+		    off64_t nbytes __unused, unsigned int flags __unused)
+{
+	errno = EIO;
+	return -1;
+}
+
+struct group;
 int getgrouplist(const char *user __unused, gid_t group __unused, gid_t *groups __unused, int *ngroups __unused)
 {
 	return 0;
@@ -130,6 +153,124 @@ int getgrgid_r(gid_t gid __unused, struct group *grp __unused,
 		char *buf __unused, size_t buflen __unused, struct group **result __unused)
 {
 	return 0;
+}
+
+int unshare(int flags __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+ssize_t tee(int fd_in __unused, int fd_out __unused, size_t len __unused,
+	    unsigned int flags __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+typedef void socklen_t;
+struct sockaddr;
+int accept4(int sockfd __unused, struct sockaddr *addr __unused,
+	    socklen_t *addrlen __unused, int flags __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int fchmodat(int dirfd __unused, const char *pathname __unused,
+	     mode_t mode __unused, int flags __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int fchownat(int dirfd __unused, const char *pathname __unused,
+             uid_t owner __unused, gid_t group __unused,
+	     int flags __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int mkdirat(int dirfd __unused, const char *pathname __unused,
+	    mode_t mode __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int mknodat(int dirfd __unused, const char *pathname __unused,
+	    mode_t mode __unused, dev_t dev __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int renameat(int olddirfd __unused, const char *oldpath __unused,
+             int newdirfd __unused, const char *newpath __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int unlinkat(int dirfd __unused, const char *pathname __unused,
+	     int flags __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+ssize_t getxattr(const char *path __unused, const char *name __unused,
+                 void *value __unused, size_t size __unused)
+{
+	errno = ENOTSUP;
+	return -1;
+}
+
+int setxattr(const char *path __unused, const char *name __unused,
+	     const void *value __unused, size_t size __unused,
+	     int flags __unused)
+{
+	errno = ENOTSUP;
+	return -1;
+}
+
+int removexattr(const char *path __unused, const char *name __unused)
+{
+	errno = ENOTSUP;
+	return -1;
+}
+
+ssize_t listxattr(const char *path __unused, char *list __unused,
+		  size_t size __unused)
+{
+	errno = ENOTSUP;
+	return -1;
+}
+
+int inotify_init(void __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int inotify_init1(int flags __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int inotify_rm_watch(int fd __unused, int wd __unused)
+{
+	errno = ENOSYS;
+	return -1;
+}
+
+int inotify_add_watch(int fd __unused, const char *pathname __unused,
+		      uint32_t mask __unused)
+{
+	errno = ENOSYS;
+	return -1;
 }
 
 /*

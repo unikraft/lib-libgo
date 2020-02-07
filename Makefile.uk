@@ -117,7 +117,6 @@ LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-memequal.c
 LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-memmove.c
 LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-nanotime.c
 LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-new.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-nosys.c
 LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-now.c
 LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-reflect-call.c
 LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-runtime-error.c
