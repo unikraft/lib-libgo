@@ -5,7 +5,7 @@ config LIBGO
 	select LIBUKALLOC
 	select LIBNEWLIBC
 	select LIBUKMMAP
-	select UKSYSINFO
+	select LIBPOSIX_SYSINFO
 	select LIBCOMPILER_RT
 	select LIBUNWIND
 	select LIBCXX
