@@ -296,9 +296,8 @@ void *alloc_stack()
 	struct uk_sched *sched = uk_sched_get_default();
 	void *stack;
 
-	uk_posix_memalign(sched->allocator,
-			  &stack, __STACK_SIZE, __STACK_SIZE);
-	if (stack == NULL)
+	if (uk_posix_memalign(sched->allocator, &stack,
+			      __STACK_SIZE, __STACK_SIZE) != 0)
 		printf("error allocating stack\n");
 	return stack;
 }
