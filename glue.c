@@ -46,6 +46,8 @@
 #include <sys/stat.h>
 #include <uk/essentials.h>
 #include <pte_types.h>
+#include <sys/epoll.h>
+#include <sys/time.h>
 
 int epoll_create(int size __unused)
 {

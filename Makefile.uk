@@ -80,7 +80,7 @@ LIBGO_CFLAGS-y += -DHAVE_CONFIG_H -D_INCLUDE_MALLOC_H_ \
 	-Wall -Wextra -Wwrite-strings -Wcast-qual -Wno-unused-function \
 	-minline-all-stringops -Wno-implicit-function-declaration \
 	-D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-LIBGO_CFLAGS-y += -Wno-cast-qual -Wno-unused-value
+LIBGO_CFLAGS-y += -Wno-cast-qual -Wno-unused-value -Wno-unused-parameter
 
 ################################################################################
 # libgo code
