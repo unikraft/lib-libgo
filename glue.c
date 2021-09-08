@@ -70,11 +70,6 @@ int epoll_wait(int epfd __unused, struct epoll_event *events __unused, int maxev
 	return 0;
 }
 
-int madvise(void *addr __unused, size_t length __unused, int advice __unused)
-{
-	return 0;
-}
-
 int mincore(void *addr __unused, size_t length __unused, unsigned char *vec __unused)
 {
 	return 0;
