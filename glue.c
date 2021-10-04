@@ -100,30 +100,6 @@ int settimeofday(const struct timeval *tv __unused, const struct timezone *tz __
 	return 0;
 }
 
-#undef sigaddset
-int sigaddset(sigset_t *set __unused, int signum __unused)
-{
-	return 0;
-}
-
-#undef sigdelset
-int sigdelset(sigset_t *set __unused, int signum __unused)
-{
-	return 0;
-}
-
-#undef sigemptyset
-int sigemptyset(sigset_t *set __unused)
-{
-	return 0;
-}
-
-#undef sigfillset
-int sigfillset(sigset_t *set __unused)
-{
-	return 0;
-}
-
 ssize_t sendfile64(int out_fd __unused, int in_fd __unused, off_t *offset  __unused, size_t  count __unused)
 {
 	return 1;
