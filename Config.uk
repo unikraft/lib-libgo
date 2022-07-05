@@ -1,20 +1,17 @@
-config LIBGO
+menuconfig LIBGO
 	bool "libgo - Go library"
 	default n
 	select LIBUKDEBUG
 	select LIBUKALLOC
-	select LIBNEWLIBC
-	select LIBUKMMAP
-	select LIBPOSIX_SYSINFO
+	select LIBPOSIX_EVENT
+	select LIBUKSIGNAL
+	select PAGING
+	select LIBUKVMEM
+	select LIBPOSIX_MMAP
 	select LIBCOMPILER_RT
 	select LIBUNWIND
-	select LIBCXX
-	select LIBCXXABI
-	select LIBPTHREAD_EMBEDDED
-	select LIBGCC
-	select LIBFFI
-	select LIBBACKTRACE
 	select LIBLWIP
-	select LIBUCONTEXT
-	select LIBPOSIX_USER
-	select LIBSYSCALL_SHIM
+
+if LIBGO
+
+endif

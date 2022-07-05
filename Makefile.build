@@ -1,0 +1,30 @@
+# TODO: Can we create build rules for the Makefiles instead?
+ifneq ($(call qstrip,$(UK_GOLIBS_R) $(UK_GOLIBS_R-y)),)
+$(foreach L,$(UK_GOLIBS_R) $(UK_GOLIBS_R-y), \
+	$(shell $(GO_PY3) $(GO_BM) -b $(L) \
+		$($(call vgolib,$(L))_BASE) \
+		-o $(call golibnametomk,$(L)) \
+		$($(call vprefix_golib,$(L),SRCS)) \
+		$($(call vprefix_golib,$(L),SRCS-y))); \
+	$(eval include $(call golibnametomk,$(L))); \
+)
+endif
+
+ifneq ($(call qstrip,$(UK_GOLIBS) $(UK_GOLIBS-y)),)
+$(foreach L,$(UK_GOLIBS) $(UK_GOLIBS-y), \
+	$(if $(call qstrip,$($(call vprefix_golib,$(L),SRCS)) \
+			   $($(call vprefix_golib,$(L),SRCS-y))), \
+		$(eval $(call build_golib,$(L), \
+				$($(call vprefix_golib,$(L),SRCS)) \
+				$($(call vprefix_golib,$(L),SRCS-y)), \
+				$(call golibnametoolib,$(L)), \
+				$(call golibnametoalib, \
+					$($(call vgolib,$(L))_DEPS) \
+					$($(call vgolib,$(L))_DEPS-y)), \
+				$($(call vprefix_golib,$(L),GOFLAGS)) \
+				$($(call vprefix_golib,$(L),GOFLAGS-y)))); \
+	, \
+		$(call verbose_info,Warning: $(L) has no sources$(comma) ignoring...) \
+	); \
+)
+endif

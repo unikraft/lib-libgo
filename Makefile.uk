@@ -4,9 +4,11 @@
 #
 #  Authors: Charalampos Mainas <charalampos.mainas@neclab.eu>
 #           Costin Lupu <costin.lupu@cs.pub.ro>
+#           Marc Rittinghaus <marc.rittinghaus@kit.edu>
 #
 #  Copyright (c) 2019, NEC Europe Ltd., NEC Corporation
 #                2019, University Politehnica of Bucharest
+#                2022, Karlsruhe Institute of Technology (KIT)
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions
@@ -38,135 +40,156 @@
 # Library registration
 ################################################################################
 $(eval $(call addlib_s,libgo,$(CONFIG_LIBGO)))
+$(eval $(call addlib_s,libgoffi,$(CONFIG_LIBGO)))
+$(eval $(call addlib_s,libgobacktrace,$(CONFIG_LIBGO)))
 
 ################################################################################
 # Original sources
 ################################################################################
-LIBGCC_VERSION=7.3.0
+LIBGCC_VERSION=12.1.0
 LIBGCC_URL=https://ftp.gnu.org/gnu/gcc/gcc-$(LIBGCC_VERSION)/gcc-$(LIBGCC_VERSION).tar.gz
 LIBGO_PATCHDIR=$(LIBGO_BASE)/patches
 LIBGCC_SUBDIR=gcc-$(LIBGCC_VERSION)
-## Patch gcc sources with libgo patches
-$(eval $(call patch,libgcc,$(LIBGO_PATCHDIR),$(LIBGCC_SUBDIR)))
+
+ifeq ($(call have_gcc),y)
+$(call error_if_gcc_version_lt,12,1)
+endif
+
+$(eval $(call fetch,libgo,$(LIBGCC_URL)))
+$(eval $(call patch,libgo,$(LIBGO_PATCHDIR),$(LIBGCC_SUBDIR)))
 
 ################################################################################
 # Helpers
 ################################################################################
-LIBGCC_EXTRACTED = $(LIBGCC_ORIGIN)/gcc-$(LIBGCC_VERSION)
-LIBGO_EXTRACTED = $(LIBGCC_EXTRACTED)/libgo
+LIBGCC_EXTRACTED         = $(LIBGO_ORIGIN)/gcc-$(LIBGCC_VERSION)
+LIBGO_EXTRACTED          = $(LIBGCC_EXTRACTED)/libgo
+LIBGOFFI_EXTRACTED       = $(LIBGCC_EXTRACTED)/libffi
+LIBGOBACKTRACE_EXTRACTED = $(LIBGCC_EXTRACTED)/libbacktrace
 
 ################################################################################
 # Library includes
 ################################################################################
-LIBGO_COMMON_INCLUDES-y = -I$(LIBGO_BASE)/include -I$(LIBGO_BASE)/generated/include \
-	-I$(LIBGO_EXTRACTED) -I$(LIBGO_EXTRACTED)/runtime \
-	-I$(LIBGCC_EXTRACTED)/libffi/include -I$(LIBGCC_BASE)/libffi/include \
-	-I$(LIBGCC_EXTRACTED)/libgcc \
-	-I$(LIBBACKTRACE_EXTRACTED) \
-	-I$(LIBGCC_EXTRACTED)/gcc/include
-LIBGO_COMMON_INCLUDES-$(CONFIG_ARCH_X86_64) += -I$(LIBFFI_EXTRACTED)/src/x86
+LIBGO_COMMON_INCLUDES-y += -I$(LIBGO_BASE)/libgo/include
+LIBGO_COMMON_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/include
+LIBGO_COMMON_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/libgcc
+LIBGO_COMMON_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/gcc
+LIBGO_COMMON_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/gcc/include
 LIBGO_COMMON_INCLUDES-$(CONFIG_ARCH_X86_64) += -I$(LIBGCC_EXTRACTED)/gcc/config/i386
-LIBGO_ASINCLUDES-y = $(LIBGO_COMMON_INCLUDES-y)
-LIBGO_CINCLUDES-y  = $(LIBGO_COMMON_INCLUDES-y)
 
+LIBGO_INCLUDES-y += -I$(LIBGO_BASE)
+LIBGO_INCLUDES-y += -I$(LIBGO_EXTRACTED)
+LIBGO_INCLUDES-y += -I$(LIBGO_EXTRACTED)/runtime
+
+LIBGOFFI_INCLUDES-y += -I$(LIBGO_BASE)/libffi/include
+LIBGOFFI_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/libffi/include
+LIBGOFFI_INCLUDES-$(CONFIG_ARCH_X86_64) += -I$(LIBGCC_EXTRACTED)/libffi/src/x86
+
+LIBGOBACKTRACE_INCLUDES-y += -I$(LIBGO_BASE)/libbacktrace/include
+LIBGOBACKTRACE_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/libbacktrace
+
+# libgo
+LIBGO_ASINCLUDES-y += $(LIBGO_COMMON_INCLUDES-y)
+LIBGO_ASINCLUDES-y += $(LIBGO_INCLUDES-y)
+LIBGO_ASINCLUDES-y += $(LIBGOFFI_INCLUDES-y)
+LIBGO_ASINCLUDES-y += $(LIBGOBACKTRACE_INCLUDES-y)
+
+LIBGO_CINCLUDES-y  += $(LIBGO_COMMON_INCLUDES-y)
+LIBGO_CINCLUDES-y  += $(LIBGO_INCLUDES-y)
+LIBGO_CINCLUDES-y  += $(LIBGOFFI_INCLUDES-y)
+LIBGO_CINCLUDES-y  += $(LIBGOBACKTRACE_INCLUDES-y)
+
+# libffi
+LIBGOFFI_ASINCLUDES-y += $(LIBGO_COMMON_INCLUDES-y)
+LIBGOFFI_ASINCLUDES-y += $(LIBGOFFI_INCLUDES-y)
+
+LIBGOFFI_CINCLUDES-y  += $(LIBGO_COMMON_INCLUDES-y)
+LIBGOFFI_CINCLUDES-y  += $(LIBGOFFI_INCLUDES-y)
+
+# libbacktrace
+LIBGOBACKTRACE_ASINCLUDES-y += $(LIBGO_COMMON_INCLUDES-y)
+LIBGOBACKTRACE_ASINCLUDES-y += $(LIBGOBACKTRACE_INCLUDES-y)
+
+LIBGOBACKTRACE_CINCLUDES-y  += $(LIBGO_COMMON_INCLUDES-y)
+LIBGOBACKTRACE_CINCLUDES-y  += $(LIBGOBACKTRACE_INCLUDES-y)
 
 ################################################################################
 # Global flags
 ################################################################################
-LIBGO_CFLAGS-y += -DHAVE_CONFIG_H -D_INCLUDE_MALLOC_H_ \
-	-fexceptions -fnon-call-exceptions -fplan9-extensions -fno-split-stack \
-	-Wall -Wextra -Wwrite-strings -Wcast-qual -Wno-unused-function \
-	-minline-all-stringops -Wno-implicit-function-declaration \
-	-D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-LIBGO_CFLAGS-y += -Wno-cast-qual -Wno-unused-value -Wno-unused-parameter
+
+# libgo
+LIBGO_CFLAGS-y += -fno-checking
+LIBGO_CFLAGS-y += -DHAVE_CONFIG_H
+LIBGO_CFLAGS-y += -fexceptions
+LIBGO_CFLAGS-y += -fnon-call-exceptions
+LIBGO_CFLAGS-y += -fno-split-stack
+LIBGO_CFLAGS-y += -Wall
+LIBGO_CFLAGS-y += -Wextra
+LIBGO_CFLAGS-y += -Wwrite-strings
+LIBGO_CFLAGS-y += -Werror
+LIBGO_CFLAGS-y += -minline-all-stringops
+LIBGO_CFLAGS-y += -D_GNU_SOURCE
+LIBGO_CFLAGS-y += -D_LARGEFILE_SOURCE
+LIBGO_CFLAGS-y += -D_FILE_OFFSET_BITS=64
+LIBGO_CFLAGS-y += -D__linux__
+LIBGO_CFLAGS-$(CONFIG_ARCH_X86_64) += -D__x86_64__
+
+LIBGO_ASFLAGS-y += -D__linux__
+LIBGO_ASFLAGS-$(CONFIG_ARCH_X86_64) += -D__x86_64__
+
+GOFLAGS-$(CONFIG_LIBGO) += -minline-all-stringops
+GOFLAGS-$(CONFIG_LIBGO) += -Wno-return-local-addr
+GOFLAGS-$(CONFIG_LIBGO) += -Wno-maybe-uninitialized
+GOFLAGS-$(CONFIG_LIBGO) += -Wno-uninitialized
+
+# libffi
+LIBGOFFI_CFLAGS-y += -DHAVE_CONFIG_H
+LIBGOFFI_CFLAGS-y += -fno-checking
+LIBGOFFI_CFLAGS-$(CONFIG_ARCH_X86_64) += -D__x86_64__
+LIBGOFFI_CFLAGS-y += -Wno-unused-parameter
+LIBGOFFI_CFLAGS-y += -Wno-unused-label
+LIBGOFFI_CFLAGS-y += -Wno-sign-compare
+LIBGOFFI_CFLAGS-y += -Wno-deprecated-declarations
+LIBGOFFI_CFLAGS-y += -Wno-implicit-fallthrough
+LIBGOFFI_CFLAGS-y += -Wno-empty-body
+
+# libbacktrace
+LIBGOBACKTRACE_CFLAGS-y +=
 
 ################################################################################
 # libgo code
 ################################################################################
+LIBGO_SRCS-y += $(LIBGO_BASE)/stubs.c
 
-LIBGO_SRCS-y += $(LIBGO_BASE)/glue.c
-
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/bytes/indexbyte.c|bytes
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/log/syslog/syslog_c.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/reflect/makefunc_ffi_c.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/runtime/internal/atomic/atomic.c|runtime.internal
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/strings/indexbyte.c|strings
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/sync/atomic/atomic.c|sync
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/syscall/clone_linux.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/syscall/errno.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/syscall/signame.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/go/syscall/wait.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/aeshash.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/env_posix.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/getncpu-linux.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-assert.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-breakpoint.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-caller.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-callers.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-cdiv.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-cgo.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-construct-map.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-ffi.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-fieldtrack.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-matherr.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-memclr.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-memcmp.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-memequal.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-memmove.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-nanotime.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-new.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-now.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-reflect-call.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-runtime-error.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-setenv.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-signal.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-strslice.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-typedesc-equal.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-unsafe-newarray.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-unsafe-new.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-unsafe-pointer.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-unsetenv.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-unwind.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-varargs.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/heapdump.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mcache.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mcentral.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mem.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mfixalloc.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mgc0.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/mheap.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/msize.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/panic.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/parfor.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/print.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/proc.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/runtime_c.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/thread.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/thread-linux.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/yield.c
+# libgo
 LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/runtime/go-main.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/sysinfo.c
-LIBGO_SRCS-y += $(LIBGO_EXTRACTED)/malloc.c # generated
 
-# Generate go2c tool
-$(LIBGO_BUILD)/goc2c: $(LIBGCC_BUILD)/.patched
-	$(call verbose_cmd,GEN,libgo: $(notdir $@), \
-		cd $(LIBGO_EXTRACTED) && gcc -o $@ $(LIBGO_EXTRACTED)/runtime/goc2c.c)
+include $(LIBGO_BASE)/libgo/Makefile.native.uk
+include $(LIBGO_BASE)/libgo/Makefile.runtime.uk
 
-# Generate malloc.c
-$(LIBGO_EXTRACTED)/malloc.c: $(LIBGO_EXTRACTED)/runtime/malloc.goc $(LIBGO_BUILD)/goc2c
-	$(call verbose_cmd,GEN,libgo: $(notdir $@), \
-		cd $(LIBGO_EXTRACTED) && $(LIBGO_BUILD)/goc2c $< > $@)
+# libffi
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/types.c
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/closures.c
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/java_raw_api.c
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/raw_api.c
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/tramp.c
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/prep_cif.c
+ifeq (x86_64,$(CONFIG_UK_ARCH))
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/x86/ffi64.c
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/x86/unix64.S
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/x86/win64.S
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/x86/ffiw64.c
+endif
 
-UK_PREPARE += $(LIBGO_BUILD)/goc2c $(LIBGO_EXTRACTED)/malloc.c
-
-# Go packages
-LIBGO_GOFLAGS-y += -minline-all-stringops -fno-split-stack
-LIBGO_GOFLAGS-$(CONFIG_DEBUG_SYMBOLS_LVL0) += -g0
-LIBGO_GOFLAGS-$(CONFIG_DEBUG_SYMBOLS_LVL1) += -g1
-LIBGO_GOFLAGS-$(CONFIG_DEBUG_SYMBOLS_LVL2) += -g2
-LIBGO_GOFLAGS-$(CONFIG_DEBUG_SYMBOLS_LVL3) += -g3
-LIBGO_GOFLAGS-y += -I$(LIBGO_BUILD)
-LIBGO_GOFLAGS = $(LIBGO_GOFLAGS-y)
-
-include $(LIBGO_BASE)/packages.uk
+# libbacktrace
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/atomic.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/backtrace.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/dwarf.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/elf.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/fileline.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/mmap.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/mmapio.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/posix.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/print.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/simple.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/sort.c
+LIBGOBACKTRACE_SRCS-y += $(LIBGOBACKTRACE_EXTRACTED)/state.c
