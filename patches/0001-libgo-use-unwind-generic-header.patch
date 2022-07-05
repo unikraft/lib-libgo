@@ -1,0 +1,14 @@
+diff --git a/libgo/runtime/go-unwind.c b/libgo/runtime/go-unwind.c
+index 16e0525..00eeae7 100644
+--- a/libgo/runtime/go-unwind.c
++++ b/libgo/runtime/go-unwind.c
+@@ -9,7 +9,7 @@
+ #include <stdlib.h>
+ #include <unistd.h>
+ 
+-#include "unwind.h"
++#include "unwind-generic.h"
+ 
+ #include "runtime.h"
+ 
+

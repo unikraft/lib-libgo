@@ -1,0 +1,5 @@
+ifneq ($(call qstrip,$(UK_GOLIBS) $(UK_GOLIBS-y)),)
+$(foreach L,$(UK_GOLIBS) $(UK_GOLIBS-y), \
+$(eval $(call clean_golib,$(L))); \
+)
+endif

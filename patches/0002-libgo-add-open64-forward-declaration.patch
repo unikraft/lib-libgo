@@ -1,0 +1,13 @@
+diff --git a/libgo/runtime/go-varargs.c b/libgo/runtime/go-varargs.c
+index f848608..87f811f 100644
+--- a/libgo/runtime/go-varargs.c
++++ b/libgo/runtime/go-varargs.c
+@@ -81,6 +81,8 @@ __go_ioctl_ptr (int d, int request, void *arg)
+ 
+ #ifdef HAVE_OPEN64
+ 
++extern int open64(const char *pathname, int flags, ...);
++
+ int
+ __go_open64 (char *path, int mode, mode_t perm)
+ {

@@ -1,23 +1,206 @@
-define buildrule_go =
-$(4): $(2) | preprocess
-	$(call build_cmd,GOC,$(1),$(4),\
-		$(GOC) $$(COMPFLAGS) $$(COMPFLAGS-y) \
-		       $$(GOCINCLUDES) $$(GOCINCLUDES-y) \
-		       $$($(call vprefix_lib,$(1),GOCINCLUDES)) $$($(call vprefix_lib,$(1),GOCINCLUDES-y)) \
-		       $$($(call vprefix_src,$(1),$(2),$(3),INCLUDES)) $$($(call vprefix_src,$(1),$(2),$(3),INCLUDES-y)) \
-		       $$($(call vprefix_glb,$(3),ARCHFLAGS)) $$($(call vprefix_glb,$(3),ARCHFLAGS-y)) \
-		       $$(GOCFLAGS) $$(GOCFLAGS-y) $$(GOCFLAGS_EXTRA) \
-		       $$($(call vprefix_lib,$(1),GOCFLAGS)) $$($(call vprefix_lib,$(1),GOCFLAGS-y)) \
-		       $$($(call vprefix_src,$(1),$(2),$(3),FLAGS)) $$($(call vprefix_src,$(1),$(2),$(3),FLAGS-y)) \
+#  SPDX-License-Identifier: BSD-3-Clause
+#
+#  libgo Makefile.rules
+#
+#  Authors: Marc Rittinghaus <marc.rittinghaus@kit.edu>
+#
+#  Copyright (c) 2022, Karlsruhe Institute of Technology (KIT)
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+
+GO_LIBGO_PATH := $(dir $(lastword $(MAKEFILE_LIST)))
+
+GO_BM  := $(addsuffix /scripts/gen-makefile.py,$(GO_LIBGO_PATH))
+GO_PY3 := python3
+
+# To avoid name clashes with regular Unikraft libraries we build all the go
+# packages in the go subfolder of the build directory
+GO_PREFIX    = go
+GO_BUILD_DIR = $(BUILD_DIR)/$(GO_PREFIX)
+
+################################################################################
+# Paths and Filenames
+################################################################################
+
+# Transform $libname to object file name
+# Example: example.com/test -> $(GO_BUILD_DIR)/example.com/test/test.o
+# golibnametoolib $libname(s)
+define golibnametoolib =
+$(addprefix $(GO_BUILD_DIR)/,$(join $(1),\
+	$(addsuffix .o,$(addprefix /,$(notdir $(1))))))
+endef
+
+# Transform $libname to archive file name
+# Example: example.com/test -> $(GO_BUILD_DIR)/example.com/libtest.a
+# golibnametoalib $libname(s)
+define golibnametoalib =
+$(addprefix $(GO_BUILD_DIR)/,$(join $(dir $(1)),\
+	$(addsuffix .a,$(addprefix lib,$(notdir $(1))))))
+endef
+
+# Receive Makefile path for a library
+# Example: example.com/test -> $(GO_BUILD_DIR)/example.com/test/Makefile
+define golibnametomk =
+$(addprefix $(GO_BUILD_DIR)/,$(addsuffix /Makefile,$(1)))
+endef
+
+# Returns all source files which are not .go files
+# Example: test.go test.c -> test.c
+# gonotgo $file(s)
+define gonotgo =
+$(patsubst %.go,,$(1))
+endef
+
+# Returns the name of the object files for each non-go source file
+# Example: example.com/test test.go test.c ->
+# 		$(GO_BUILD_DIR)/example.com/test/test.c.o
+# gonotgoobjs $libname $file(s)
+define gonotgoobjs =
+$(addprefix $(GO_BUILD_DIR)/$(1)/,$(addsuffix .o,\
+	$(call gonotgo,$(notdir $(2)))))
+endef
+
+################################################################################
+# Variable name prefixes
+################################################################################
+
+# Transform $libname to a variable name. This will uppercase and substitute
+# . and / and - with underscores.
+# Example: example.com/test -> EXAMPLE_COM_TEST
+# vgolib $libname(s)
+vgolib = $(call uc,$(subst .,_,$(subst /,_,$(subst -,_,$(1)))))
+
+# Build a variable name from $libname
+# Example: example.com/test, SRCS -> EXAMPLE_COM_TEST_SRCS
+# vprefix_golib $libname,$varname(s)
+vprefix_golib = $(addprefix $(call vgolib,$(1))_,$(2))
+
+################################################################################
+# Registration
+################################################################################
+
+# Filter compiler flags commonly used in Unikraft that are not supported by
+# gccgo and trigger a warning during build
+# _filter_flags $flags
+define _gofilter_flags =
+$(subst -ffreestanding,, \
+$(subst -fhosted,,$(1)))
+endef
+
+# _linkgolib $libname
+define _linkgolib =
+UK_ALIBS-y += $(call golibnametoalib,$(1))
+endef
+
+# Register a GO library to the build system. This might be GO main
+# or a different GO package (in which case we have the addtional
+# -fgo-pkgpath flag)
+#
+# TODO: We do not handle the case where dependencies are includes
+#       multiple times
+#
+# __addgolib $libname,$extraflags,$linkit
+define __addgolib =
+$(call mk_sub_libbuild_dir,$(GO_PREFIX),$(1))
+UK_GOLIBS-y   += $(1)
+UK_ALIBS-$(3) += $(call golibnametoalib,$(1))
+$(eval $(call vgolib,$(1))_BASE    := $(IMPORT_BASE))
+$(eval $(call vgolib,$(1))_BUILD   := $(GO_BUILD_DIR)/$(1))
+$(eval $(call vgolib,$(1))_GOFLAGS += $(2))
+endef
+
+# _addgolib $libname,$extraflags,$linkit
+_addgolib = $(call __addgolib,$(1),-fgo-pkgpath=$(1) $(2),$(3))
+
+# _addgolib $libname,$extraflags
+_addgoapp = $(call __addgolib,$(1),$(2),y)
+
+# Register a GO library and append it to the list of libraries that need to
+# be processed for dependency resolution before starting the actual build
+# addgolib $libname
+define addgolib
+$(call _addgolib,$(1),,y)
+UK_GOLIBS_R += $(1)
+endef
+
+# addgolib_s $libname,$switch
+define addgolib_s
+ifeq ($(2),y)
+$(call addgolib,$(1))
+endif
+endef
+
+# Same as addgolib but for an GO application library supplying the main pkg
+# addgoapp $libname
+define addgoapp =
+$(call _addgoapp,$(1),)
+UK_GOLIBS_R += $(1)
+endef
+
+# addgoapp_s $libname,$switch
+define addgoapp_s
+ifeq ($(2),y)
+$(call addgoapp,$(1))
+endif
+endef
+
+################################################################################
+# Buildrules for libraries
+################################################################################
+
+# build_golib $libname,$source,$target,$deps,$extraflags
+define build_golib =
+$(call golibnametoalib,$(1)): $(2) $(4) $(call gonotgoobjs,$(1),$(2))
+	$(call build_cmd,GCCGO,$(1),$(3),\
+		$(GOC) $$(call _gofilter_flags,$$(COMPFLAGS) $$(COMPFLAGS-y)) \
+		       $$(GOFLAGS) $$(GOFLAGS-y) \
 		       $(5) \
-		       $$(DBGFLAGS) $$(DBGFLAGS-y) \
-		       -D__LIBNAME__=$(1) -D__BASENAME__=$(notdir $(2)) $(if $(3),-D__VARIANT__=$(3)) \
-		       -c $(2) -o $(4) $(call depflags,$(4))
+		       -I $(GO_BUILD_DIR) \
+		       $$(call _gofilter_flags,$$(DBGFLAGS) $$(DBGFLAGS-y)) \
+		       -c $(filter %.go,$(2)) -o $(3) \
+	)
+	$(call build_cmd,AR,$(1),$(call golibnametoalib,$(1)),\
+		$(AR) rcD $(call golibnametoalib,$(1)) \
+			$(3) $(call gonotgoobjs,$(1),$(2)) \
 	)
 
+$(foreach S,$(call gonotgo,$(2)), \
+	$(eval $(call buildrule,$(call vgolib,$(1)),$(S),, \
+				$(call gonotgoobjs,$(1),$(S)))) \
+)
+
 UK_SRCS-y += $(2)
-UK_DEPS-y += $(call out2dep,$(4))
-UK_OBJS-y += $(4)
-$(eval $(call vprefix_lib,$(1),OBJS-y) += $(4))
-$(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(4)) $(call out2dep,$(4)))
+UK_OBJS-y += $(3)
+$(eval $(call vprefix_golib,$(1),OBJS-y) += $(3))
+
+$(eval $(call vprefix_golib,$(1),CLEAN-y) += $(call build_clean,$(3)))
+$(eval $(call vprefix_golib,$(1),CLEAN-y) += $(call golibnametoalib,$(1)))
+
+$(GO_PREFIX)/$(1): $(3)
+
+.PHONY: $(GO_PREFIX)/$(1)
 endef
