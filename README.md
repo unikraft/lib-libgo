@@ -4,26 +4,23 @@ libgo for Unikraft
 This is a port of libgo for Unikraft as an external library. You will
 need the following external libraries to make it work:
 
-+ gcc
-+ libgo
-+ pthread-embedded
-+ lwip
 + compiler-rt
-+ libcxx
-+ libcxxabi
 + libunwind
-+ libucontext
-+ newlib
++ libgo
++ musl
++ lwip
 
 Please note that the listed order is important, in particular
-gcc before libgo, e.g.:
+compiler-rt before libgo and musl, e.g.:
 
 ```
-...$(UK_LIBS)/gcc:$(UK_LIBS)/libgo:$(UK_LIBS)/pthread-embedded...
+...$(UK_LIBS)/compiler-rt:$(UK_LIBS)/libunwind:$(UK_LIBS)/libgo:$(UK_LIBS)/musl:$(UK_LIBS)/lwip...
 
 ```
 
-Currently, you need to assign at least 512 MB of RAM to the guest.
+Currently, you need to use GCC 12 along with gccgo >= 12.
+Only the x86 architecture is supported for the moment.
+If using QEMU, the `-cpu host` option must be passed as an argument, because the default CPU cannot handle 1GB pages.
 
 Please refer to the `README.md` as well as the documentation in the `doc/`
 subdirectory of the main unikraft repository.
