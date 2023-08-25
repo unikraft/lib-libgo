@@ -6,8 +6,8 @@ menuconfig LIBGO
 	select LIBPOSIX_EVENT
 	select LIBUKSIGNAL
 	select PAGING
-	select LIBUKVMEM
-	select LIBPOSIX_MMAP
+	imply LIBUKVMEM
+	imply LIBPOSIX_MMAP
 	select LIBCOMPILER_RT
 	select LIBUNWIND
 	select LIBLWIP
