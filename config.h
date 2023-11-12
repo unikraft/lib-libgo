@@ -28,6 +28,9 @@
 
 /* Define if your assembler supports PC relative relocs. */
 #define HAVE_AS_X86_PCREL 1
+#else
+/* Define if your assembler supports AES instructions. */
+#undef HAVE_AS_X86_AES
 #endif
 
 /* Define to 1 if you have the `atan2l' function. */

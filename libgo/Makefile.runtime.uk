@@ -19,7 +19,8 @@ $(eval $(call _addgolib,internal/cfg,))
 INTERNAL_CFG_SRCS += $(LIBGO_EXTRACTED)/go/internal/cfg/cfg.go
 $(eval $(call _addgolib,internal/goarch,))
 INTERNAL_GOARCH_SRCS += $(LIBGO_EXTRACTED)/go/internal/goarch/goarch.go
-INTERNAL_GOARCH_SRCS += $(LIBGO_BASE)/libgo/zgoarch.go
+INTERNAL_GOARCH_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/zgoarch.go
+INTERNAL_GOARCH_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_BASE)/libgo/arm64/zgoarch.go
 $(eval $(call _addgolib,encoding,))
 ENCODING_SRCS += $(LIBGO_EXTRACTED)/go/encoding/encoding.go
 $(eval $(call _addgolib,internal/nettrace,))
@@ -84,6 +85,7 @@ RUNTIME_INTERNAL_SYS_SRCS += $(LIBGO_EXTRACTED)/go/runtime/internal/sys/intrinsi
 RUNTIME_INTERNAL_SYS_SRCS += $(LIBGO_EXTRACTED)/go/runtime/internal/sys/intrinsics_common.go
 RUNTIME_INTERNAL_SYS_SRCS += $(LIBGO_EXTRACTED)/go/runtime/internal/sys/sys.go
 RUNTIME_INTERNAL_SYS_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/version.go
+RUNTIME_INTERNAL_SYS_SRCS-$(CONFIG_ARCH_ARM_64)  += $(LIBGO_BASE)/libgo/arm64/version.go
 RUNTIME_INTERNAL_SYS_DEPS += internal/goarch
 RUNTIME_INTERNAL_SYS_DEPS += internal/goos
 $(eval $(call _addgolib,math/bits,))
@@ -93,7 +95,10 @@ MATH_BITS_SRCS += $(LIBGO_EXTRACTED)/go/math/bits/bits_tables.go
 $(eval $(call _addgolib,internal/cpu,))
 INTERNAL_CPU_SRCS += $(LIBGO_EXTRACTED)/go/internal/cpu/cpu.go
 INTERNAL_CPU_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_EXTRACTED)/go/internal/cpu/cpu_x86.go
-INTERNAL_CPU_SRCS += $(LIBGO_BASE)/libgo/cpugen.go
+INTERNAL_CPU_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/cpugen.go
+INTERNAL_CPU_SRCS-$(CONFIG_ARCH_ARM_64)  += $(LIBGO_EXTRACTED)/go/internal/cpu/cpu_arm64.go
+INTERNAL_CPU_SRCS-$(CONFIG_ARCH_ARM_64)  += $(LIBGO_EXTRACTED)/go/internal/cpu/cpu_arm64_other.go
+INTERNAL_CPU_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_BASE)/libgo/arm64/cpugen.go
 $(eval $(call _addgolib,hash/maphash,))
 HASH_MAPHASH_SRCS += $(LIBGO_EXTRACTED)/go/hash/maphash/maphash.go
 HASH_MAPHASH_DEPS += internal/unsafeheader
@@ -134,7 +139,6 @@ MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/erf.go
 MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/erfinv.go
 MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/exp.go
 MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/exp2_noasm.go
-MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/exp_amd64.go
 MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/exp_noasm.go
 MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/expm1.go
 MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/floor.go
@@ -169,6 +173,7 @@ MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/tan.go
 MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/tanh.go
 MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/trig_reduce.go
 MATH_SRCS += $(LIBGO_EXTRACTED)/go/math/unsafe.go
+MATH_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_EXTRACTED)/go/math/exp_amd64.go
 MATH_DEPS += internal/cpu
 MATH_DEPS += math/bits
 $(eval $(call _addgolib,math/cmplx,))
@@ -303,8 +308,10 @@ RUNTIME_SRCS += $(LIBGO_EXTRACTED)/go/runtime/type.go
 RUNTIME_SRCS += $(LIBGO_EXTRACTED)/go/runtime/typekind.go
 RUNTIME_SRCS += $(LIBGO_EXTRACTED)/go/runtime/utf8.go
 RUNTIME_SRCS += $(LIBGO_EXTRACTED)/go/runtime/write_err.go
-RUNTIME_SRCS += $(LIBGO_BASE)/libgo/runtime_linknames.go
+RUNTIME_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/runtime_linknames.go
 RUNTIME_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/runtime_sysinfo.go
+RUNTIME_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_BASE)/libgo/arm64/runtime_linknames.go
+RUNTIME_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_BASE)/libgo/arm64/runtime_sysinfo.go
 RUNTIME_SRCS += $(LIBGO_BASE)/libgo/sigtab.go
 RUNTIME_SRCS += $(LIBGO_BASE)/libgo/goroot.go
 RUNTIME_DEPS += internal/abi
@@ -515,7 +522,7 @@ SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/exec_linux.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/exec_unix.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/libcall_glibc.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/libcall_linux.go
-SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/libcall_linux_amd64.go
+SYSCALL_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_EXTRACTED)/go/syscall/libcall_linux_amd64.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/libcall_linux_utimesnano.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/libcall_posix.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/libcall_posix_largefile.go
@@ -542,14 +549,18 @@ SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/syscall_errno.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/syscall_funcs.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/syscall_glibc.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/syscall_linux.go
-SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/syscall_linux_amd64.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/syscall_unix.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/time_nofake.go
 SYSCALL_SRCS += $(LIBGO_EXTRACTED)/go/syscall/timestruct.go
-SYSCALL_SRCS += $(LIBGO_BASE)/libgo/libcalls.go
+SYSCALL_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/libcalls.go
+SYSCALL_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_EXTRACTED)/go/syscall/syscall_linux_amd64.go
 SYSCALL_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/sysinfo.go
-SYSCALL_SRCS += $(LIBGO_BASE)/libgo/syscall_arch.go
-SYSCALL_SRCS += $(LIBGO_BASE)/libgo/syscall_linknames.go
+SYSCALL_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/syscall_arch.go
+SYSCALL_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/syscall_linknames.go
+SYSCALL_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_BASE)/libgo/arm64/libcalls.go
+SYSCALL_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_BASE)/libgo/arm64/sysinfo.go
+SYSCALL_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_BASE)/libgo/arm64/syscall_arch.go
+SYSCALL_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_BASE)/libgo/arm64/syscall_linknames.go
 SYSCALL_SRCS += $(LIBGO_BASE)/libgo/epoll.go
 SYSCALL_DEPS += errors
 SYSCALL_DEPS += internal/bytealg
@@ -682,7 +693,8 @@ INTERNAL_SYSCALL_UNIX_SRCS += $(LIBGO_EXTRACTED)/go/internal/syscall/unix/getran
 INTERNAL_SYSCALL_UNIX_SRCS += $(LIBGO_EXTRACTED)/go/internal/syscall/unix/getrandom_linux.go
 INTERNAL_SYSCALL_UNIX_SRCS += $(LIBGO_EXTRACTED)/go/internal/syscall/unix/net.go
 INTERNAL_SYSCALL_UNIX_SRCS += $(LIBGO_EXTRACTED)/go/internal/syscall/unix/nonblocking.go
-INTERNAL_SYSCALL_UNIX_SRCS += $(LIBGO_EXTRACTED)/go/internal/syscall/unix/sysnum_linux_amd64.go
+INTERNAL_SYSCALL_UNIX_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_EXTRACTED)/go/internal/syscall/unix/sysnum_linux_amd64.go
+INTERNAL_SYSCALL_UNIX_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_EXTRACTED)/go/internal/syscall/unix/sysnum_linux_generic.go
 INTERNAL_SYSCALL_UNIX_DEPS += sync/atomic
 INTERNAL_SYSCALL_UNIX_DEPS += syscall
 $(eval $(call _addgolib,image/internal/imageutil,))
@@ -1020,7 +1032,8 @@ OS_SRCS += $(LIBGO_EXTRACTED)/go/os/tempfile.go
 OS_SRCS += $(LIBGO_EXTRACTED)/go/os/types.go
 OS_SRCS += $(LIBGO_EXTRACTED)/go/os/types_unix.go
 OS_SRCS += $(LIBGO_EXTRACTED)/go/os/wait_waitid.go
-OS_SRCS += $(LIBGO_BASE)/libgo/os_linknames.go
+OS_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/os_linknames.go
+OS_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_BASE)/libgo/arm64/os_linknames.go
 OS_DEPS += errors
 OS_DEPS += internal/itoa
 OS_DEPS += internal/oserror
@@ -1078,18 +1091,24 @@ INTERNAL_INTERN_DEPS += internal/godebug
 INTERNAL_INTERN_DEPS += runtime
 INTERNAL_INTERN_DEPS += sync
 $(eval $(call _addgolib,golang.org/x/sys/cpu,))
-ifeq (x86_64,$(CONFIG_UK_ARCH))
 GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_EXTRACTED)/go/golang.org/x/sys/cpu/byteorder.go
 GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_EXTRACTED)/go/golang.org/x/sys/cpu/cpu.go
-GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_EXTRACTED)/go/golang.org/x/sys/cpu/cpu_gccgo_x86.go
 GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_EXTRACTED)/go/golang.org/x/sys/cpu/cpu_linux_noinit.go
-GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_EXTRACTED)/go/golang.org/x/sys/cpu/cpu_x86.go
 GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_EXTRACTED)/go/golang.org/x/sys/cpu/hwcap_linux.go
-GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_BASE)/libgo/gcpugen.go
 GOLANG_ORG_X_SYS_CPU_DEPS += io/ioutil
 GOLANG_ORG_X_SYS_CPU_DEPS += os
 GOLANG_ORG_X_SYS_CPU_DEPS += runtime
 GOLANG_ORG_X_SYS_CPU_DEPS += strings
+ifeq (x86_64,$(CONFIG_UK_ARCH))
+GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_EXTRACTED)/go/golang.org/x/sys/cpu/cpu_gccgo_x86.go
+GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_EXTRACTED)/go/golang.org/x/sys/cpu/cpu_x86.go
+GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_BASE)/libgo/x86/gcpugen.go
+else
+ifeq (arm64,$(CONFIG_UK_ARCH))
+GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_EXTRACTED)/go/golang.org/x/sys/cpu/cpu_gccgo_arm64.go
+GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_EXTRACTED)/go/golang.org/x/sys/cpu/cpu_arm64.go
+GOLANG_ORG_X_SYS_CPU_SRCS += $(LIBGO_BASE)/libgo/arm64/gcpugen.go
+endif
 endif
 $(eval $(call _addgolib,path/filepath,))
 PATH_FILEPATH_SRCS += $(LIBGO_EXTRACTED)/go/path/filepath/match.go
@@ -1288,7 +1307,8 @@ OS_USER_SRCS += $(LIBGO_EXTRACTED)/go/os/user/decls_unix.go
 OS_USER_SRCS += $(LIBGO_EXTRACTED)/go/os/user/getgrouplist_unix.go
 OS_USER_SRCS += $(LIBGO_EXTRACTED)/go/os/user/lookup.go
 OS_USER_SRCS += $(LIBGO_EXTRACTED)/go/os/user/user.go
-OS_USER_SRCS += $(LIBGO_BASE)/libgo/os_user_linknames.go
+OS_USER_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBGO_BASE)/libgo/x86/os_user_linknames.go
+OS_USER_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBGO_BASE)/libgo/arm64/os_user_linknames.go
 OS_USER_DEPS += fmt
 OS_USER_DEPS += strconv
 OS_USER_DEPS += strings
