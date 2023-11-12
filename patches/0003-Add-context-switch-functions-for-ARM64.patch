@@ -1,0 +1,41 @@
+From 1c50741ef721664dc646b9ef989838f992c59f37 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Eduard=20Vintil=C4=83?= <eduard.vintila47@gmail.com>
+Date: Wed, 8 Nov 2023 12:39:21 +0200
+Subject: [PATCH] Add context switch functions for ARM64
+
+Signed-off-by: Eduard Vintilă <eduard.vintila47@gmail.com>
+
+---
+ libgo/runtime/runtime.h | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/libgo/runtime/runtime.h b/libgo/runtime/runtime.h
+index b3dc4fd24..2598fddf0 100644
+--- a/libgo/runtime/runtime.h
++++ b/libgo/runtime/runtime.h
+@@ -491,7 +491,7 @@ bool probestackmaps(void)
+ extern uint32 __go_runtime_in_callers;
+
+ // Cheaper context switch functions.  Currently only defined on
+-// Linux/AMD64.
++// Linux/AMD64 and ARM64.
+ #if defined(__x86_64__) && defined(__linux__) && !defined(__CET__)
+ typedef struct {
+ 	uint64 regs[8];
+@@ -499,6 +499,13 @@ typedef struct {
+ int __go_getcontext(__go_context_t*);
+ int __go_setcontext(__go_context_t*);
+ void __go_makecontext(__go_context_t*, void (*)(), void*, size_t);
++#elif defined(__ARM_64__)
++typedef struct {
++	uint64 regs[14];
++} __go_context_t;
++int __go_getcontext(__go_context_t*);
++int __go_setcontext(__go_context_t*);
++void __go_makecontext(__go_context_t*, void (*)(), void*, size_t);
+ #else
+ #define __go_context_t	ucontext_t
+ #define __go_getcontext(c)	getcontext(c)
+--
+2.42.0
+
