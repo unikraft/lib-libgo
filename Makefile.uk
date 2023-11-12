@@ -75,14 +75,17 @@ LIBGO_COMMON_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/libgcc
 LIBGO_COMMON_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/gcc
 LIBGO_COMMON_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/gcc/include
 LIBGO_COMMON_INCLUDES-$(CONFIG_ARCH_X86_64) += -I$(LIBGCC_EXTRACTED)/gcc/config/i386
+LIBGO_COMMON_INCLUDES-$(CONFIG_ARCH_ARM_64) += -I$(LIBGCC_EXTRACTED)/gcc/config/aarch64
 
 LIBGO_INCLUDES-y += -I$(LIBGO_BASE)
 LIBGO_INCLUDES-y += -I$(LIBGO_EXTRACTED)
 LIBGO_INCLUDES-y += -I$(LIBGO_EXTRACTED)/runtime
 
-LIBGOFFI_INCLUDES-y += -I$(LIBGO_BASE)/libffi/include
+LIBGOFFI_INCLUDES-$(CONFIG_ARCH_X86_64) += -I$(LIBGO_BASE)/libffi/include/x86
+LIBGOFFI_INCLUDES-$(CONFIG_ARCH_ARM_64) += -I$(LIBGO_BASE)/libffi/include/arm64
 LIBGOFFI_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/libffi/include
 LIBGOFFI_INCLUDES-$(CONFIG_ARCH_X86_64) += -I$(LIBGCC_EXTRACTED)/libffi/src/x86
+LIBGOFFI_INCLUDES-$(CONFIG_ARCH_ARM_64) += -I$(LIBGCC_EXTRACTED)/libffi/src/arm64
 
 LIBGOBACKTRACE_INCLUDES-y += -I$(LIBGO_BASE)/libbacktrace/include
 LIBGOBACKTRACE_INCLUDES-y += -I$(LIBGCC_EXTRACTED)/libbacktrace
@@ -126,20 +129,28 @@ LIBGO_CFLAGS-y += -Wall
 LIBGO_CFLAGS-y += -Wextra
 LIBGO_CFLAGS-y += -Wwrite-strings
 LIBGO_CFLAGS-y += -Werror
-LIBGO_CFLAGS-y += -minline-all-stringops
+LIBGO_CFLAGS-y += -Wno-error=missing-braces
+LIBGO_CFLAGS-y += -Wno-missing-braces
+LIBGO_CFLAGS-y += -Wno-error=sign-compare
+LIBGO_CFLAGS-y += -Wno-sign-compare
 LIBGO_CFLAGS-y += -D_GNU_SOURCE
 LIBGO_CFLAGS-y += -D_LARGEFILE_SOURCE
 LIBGO_CFLAGS-y += -D_FILE_OFFSET_BITS=64
 LIBGO_CFLAGS-y += -D__linux__
+LIBGO_CFLAGS-$(CONFIG_ARCH_X86_64) += -minline-all-stringops
 LIBGO_CFLAGS-$(CONFIG_ARCH_X86_64) += -D__x86_64__
+LIBGO_CFLAGS-$(CONFIG_ARCH_ARM_64) += -D__ARM_64__
 
 LIBGO_ASFLAGS-y += -D__linux__
 LIBGO_ASFLAGS-$(CONFIG_ARCH_X86_64) += -D__x86_64__
+LIBGO_ASFLAGS-$(CONFIG_ARCH_ARM_64) += -D__ARM_64__
 
-GOFLAGS-$(CONFIG_LIBGO) += -minline-all-stringops
-GOFLAGS-$(CONFIG_LIBGO) += -Wno-return-local-addr
-GOFLAGS-$(CONFIG_LIBGO) += -Wno-maybe-uninitialized
-GOFLAGS-$(CONFIG_LIBGO) += -Wno-uninitialized
+ifeq ($(CONFIG_LIBGO), y)
+GOFLAGS-$(CONFIG_ARCH_X86_64) += -minline-all-stringops
+GOFLAGS-y += -Wno-return-local-addr
+GOFLAGS-y += -Wno-maybe-uninitialized
+GOFLAGS-y += -Wno-uninitialized
+endif
 
 # libffi
 LIBGOFFI_CFLAGS-y += -DHAVE_CONFIG_H
@@ -178,6 +189,11 @@ LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/x86/ffi64.c
 LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/x86/unix64.S
 LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/x86/win64.S
 LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/x86/ffiw64.c
+else
+ifeq (arm64,$(CONFIG_UK_ARCH))
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/aarch64/ffi.c
+LIBGOFFI_SRCS-y += $(LIBGOFFI_EXTRACTED)/src/aarch64/sysv.S
+endif
 endif
 
 # libbacktrace
